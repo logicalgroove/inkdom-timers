@@ -149,3 +149,7 @@ store links to is `PRIVACY.md`.
 - People data: [Kontur Population](https://data.humdata.org/dataset/kontur-population-dataset-3km), 3 km hexagons,
   release 2023-11-01, CC BY.
 - Hexagon grid: [H3](https://h3geo.org/) (h3-js 4.5.0), Apache-2.0. Its licence and notice are in `vendor/`.
+
+## Licence
+
+MIT, see [LICENSE](LICENSE). The H3 library and the people data keep their own licences, named above.

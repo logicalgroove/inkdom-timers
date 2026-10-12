@@ -7,5 +7,6 @@
     "test": "TZ=UTC node --test",
     "package": "node tools/package.js",
     "lint": "npx --yes web-ext@10.7.0 lint --source-dir . --ignore-files 'dist/**' 'docs/**' 'store/**' 'support/**' 'test/**' 'tools/**' 'node_modules/**' '*.md' 'package.json'"
-  }
+  },
+  "license": "MIT"
 }
