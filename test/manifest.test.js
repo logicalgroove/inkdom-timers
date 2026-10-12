@@ -51,9 +51,9 @@ test('the people data is the one file the game page may read, and it is there', 
   assert.ok(fs.existsSync(path.join(root, 'data/people-r6.bin')));
 });
 
-test('still one permission, and version 0.3.0', () => {
+test('still one permission, and version 0.4.0', () => {
   assert.deepEqual(manifest.permissions, ['storage']);
-  assert.equal(manifest.version, '0.3.0');
+  assert.equal(manifest.version, '0.4.0');
 });
 
 test('package.json carries the same version as the manifest', () => {

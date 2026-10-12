@@ -1,6 +1,6 @@
 {
   "name": "inkdom-timers",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "description": "Unofficial helper for InkDom: a timers panel (Chrome extension).",
   "scripts": {

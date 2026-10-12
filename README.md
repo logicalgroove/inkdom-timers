@@ -83,12 +83,14 @@ Chrome 111 or later.
 - The people figures are Kontur's release of 2023-11-01. The game may use another release, and it gives you the
   share of a hexagon your land covers, so what a loop pays can differ from the figures shown.
 
-## Known gaps in 0.3.0
+## Known gaps in 0.4.0
 
 The people layer was checked in live play on 2026-10-11: the game's sidebar, toolbar, buttons and avatars stay on
-top of it, it lines up with the map, it follows the game's zoom buttons, and it hides while the map zooms. Not
-yet checked: the game's dialogs over the layer, whether it hides and comes back cleanly on a drag or a wheel
-zoom, and drawing a loop with it on.
+top of it, it lines up with the map, and it follows the game's zoom buttons. The redraw on the game's view
+request was checked on 2026-10-12. Not yet checked in live play: the layer sliding and scaling with a drag or a
+wheel zoom, which reads the pixel offset out of the game's pin transforms and hides if it cannot; a long
+north-south pan with a single pin on screen, where the scale bar's change with latitude is read as a slight zoom
+until the next view; the game's dialogs over the layer; and drawing a loop with it on.
 
 Not yet checked in live play: countdowns after returning to the tab from another window, the ink row after a loop
 with the game's sidebar unfolded, and drawing a loop right next to the panel. Dragging was checked with real mouse
