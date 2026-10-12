@@ -72,10 +72,11 @@ Chrome 111 or later.
 - New-player protection is worked out from a player's first loop ever. If the game protects returning players
   again each season, the panel does not show that.
 - If the game changes its data format the panel says so, or rows stop updating, until the extension is updated.
-- The people layer is hidden while the map moves and comes back when the game says what the new view is, usually
-  within a second or two. A pan is noticed through your own land pins, so an account with no land sees the layer
-  hold still during a drag and jump into place afterwards. If the game reports no new view within 8 seconds, the
-  layer is shown again as it was.
+- While the map moves, the people layer slides and scales along with it, read off the map's pins and scale bar,
+  and is drawn afresh when the game asks who is in the new view, usually within a second. A zoomed-in drawing is
+  blurry until then. A move is noticed through the game's land pins, so with none on screen a pan leaves the
+  layer holding still and a zoom hides it until the next view; if none comes within 8 seconds, the layer is shown
+  again as it was.
 - The layer dims the game's place names where it is dark. At the game's two widest zooms, with most of the world
   on screen, it is not drawn and the panel says it is waiting for the map view. In a large window it moves to
   larger hexagons sooner, because it draws at most about 25,000 at a time.

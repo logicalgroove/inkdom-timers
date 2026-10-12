@@ -5,7 +5,9 @@
 //   node tools/smoke.js            exit 0 when the panel shows the two fixture neighbours, no notice, on hover
 //                                  the first one's land outline with its name, and with People switched on
 //                                  the layer inside the map, dark over Dhaka, clear over the Sundarbans, and
-//                                  after a wider view with the pointer held still the larger hexagon's figure
+//                                  after a wider view with the pointer held still the larger hexagon's figure,
+//                                  and the layer sliding with a pan, scaling with a zoom and hiding when the
+//                                  pins move in a way that is neither
 //   CHROME=/path/to/chrome node tools/smoke.js
 const http = require('node:http');
 const fs = require('node:fs');
@@ -79,22 +81,31 @@ const PAGE = `<!doctype html><meta charset="utf-8"><title>smoke</title><div aria
   await fetch('/api/read', { method: 'POST', body: ${JSON.stringify(ASK_WIDE)} });
   await new Promise(r => setTimeout(r, 1500));
   people.wide = { hexes: txt('.hexes')[0], here: txt('.here')[0] };
-  // The map moves: the game's pins shift and the layer must go at once. It comes back with the next view,
-  // and a change of the scale bar's width, which is a zoom, hides it again.
+  // The map moves: the game's pins all shift the same way, and the layer slides along with them at once, with
+  // the figure under the still pointer read again. The next view draws it afresh. A zoom, where the pins
+  // spread out and the scale bar changes, scales it. Pins moved in a way no pan or zoom explains hide it.
   const shown = () => (layer ? layer.style.visibility || 'visible' : null);
   const settle = ms => new Promise(r => setTimeout(r, ms));
+  const place = where => document.querySelectorAll('.maplibregl-marker').forEach((pin, i) => { pin.style.transform = 'translate(' + where[i][0] + 'px, ' + where[i][1] + 'px)'; });
   people.hide = { before: shown() };
-  document.querySelectorAll('.maplibregl-marker').forEach((pin, i) => { pin.style.transform = 'translate(' + (-700 - 100 * i) + 'px, 90px)'; });
+  place([[-700, 90], [-800, 110]]);
   await settle(300);
   people.hide.afterPan = shown();
-  people.hide.hereHidden = txt('.here')[0];
+  people.hide.slide = layer.style.transform;
+  people.hide.hereSlid = txt('.here')[0];
   await fetch('/api/read', { method: 'POST', body: ${JSON.stringify(ASK)} });
   await settle(1500);
   people.hide.afterView = shown();
+  people.hide.afterViewSlide = layer.style.transform;
   people.hide.hereBack = txt('.here')[0];
-  document.querySelector('.maplibregl-ctrl-scale').style.width = '80px';
+  document.querySelector('.maplibregl-ctrl-scale').style.width = '130px';
+  place([[-1400, 180], [-1600, 220]]);
   await settle(300);
   people.hide.afterZoom = shown();
+  people.hide.zoom = layer.style.transform;
+  place([[-100, 5], [-900, 600]]);
+  await settle(300);
+  people.hide.afterScatter = shown();
   await fetch('/report', { method: 'POST', body: JSON.stringify({
     people,
     panel: !!root, note: note && !note.hidden ? note.textContent : null, you: txt('.p-sec .kv'), rows: txt('.row'),
@@ -141,8 +152,10 @@ server.listen(0, '127.0.0.1', async () => {
     pe && pe.order.join() === 'You,People,On screen' && pe.sibling === true && pe.dhaka > 127 && pe.forest === 0 && pe.ticks.length === 2 && pe.ticks.every(t => /\d/.test(t)) &&
     /455,625 in this hexagon$/.test(pe.here || '') &&
     pe.wide && pe.wide.hexes === 'Hexagons about 20 km across' && /in this hexagon$/.test(pe.wide.here || '') && pe.wide.here !== pe.here &&
-    pe.hide && pe.hide.before === 'visible' && pe.hide.afterPan === 'hidden' && /^Point at the map/.test(pe.hide.hereHidden || '') &&
-    pe.hide.afterView === 'visible' && /455,625 in this hexagon$/.test(pe.hide.hereBack || '') && pe.hide.afterZoom === 'hidden';
+    pe.hide && pe.hide.before === 'visible' && pe.hide.afterPan === 'visible' && pe.hide.slide === 'translate(-200px, 70px) scale(1)' &&
+    /in this hexagon$|^No people/.test(pe.hide.hereSlid || '') && pe.hide.hereSlid !== pe.here &&
+    pe.hide.afterView === 'visible' && pe.hide.afterViewSlide === '' && /455,625 in this hexagon$/.test(pe.hide.hereBack || '') &&
+    pe.hide.afterZoom === 'visible' && pe.hide.zoom === 'translate(0px, 0px) scale(2)' && pe.hide.afterScatter === 'hidden';
   console.log(ok ? 'SMOKE OK' : 'SMOKE FAILED');
   process.exitCode = ok ? 0 : 1;
 });

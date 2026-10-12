@@ -44,12 +44,66 @@
     return out;
   }
 
-  // Where the page says the map is: the scale bar's width, and where each of the game's map pins sits on screen.
+  // Where the page says the map is: the scale bar's width and figure, and where each of the game's map pins sits
+  // on screen.
   function reading(map) {
     const box = map && map.parentElement, doc = map && map.ownerDocument, pins = new Map();
     const bar = doc && doc.querySelector ? doc.querySelector('.maplibregl-ctrl-scale') : null;
     if (box && box.querySelectorAll) for (const pin of box.querySelectorAll('.maplibregl-marker')) pins.set(pin, pin.style.transform);
-    return { scale: bar ? bar.style.width : null, pins };
+    return { scale: bar ? bar.style.width : null, label: bar ? bar.textContent : null, pins };
+  }
+
+  // The pixel offset in a pin's transform, as [x, y], or null.
+  function pinAt(transform) {
+    const m = typeof transform === 'string' ? /translate\(\s*(-?\d*\.?\d+)px\s*,\s*(-?\d*\.?\d+)px\s*\)/.exec(transform) : null;
+    return m ? [Number(m[1]), Number(m[2])] : null;
+  }
+
+  // How many screen pixels the scale bar gives one metre, or null when it cannot be read.
+  const METRES = { m: 1, km: 1000, ft: 0.3048, mi: 1609.344, nm: 1852 };
+  function pxPerMetre(r) {
+    const w = /^(\d*\.?\d+)px$/.exec(r.scale || ''), l = /(\d*\.?\d+)\s*(km|m|ft|mi|nm)\b/.exec(r.label || '');
+    if (!w || !l) return null;
+    const px = Number(w[1]) / (Number(l[1]) * METRES[l[2]]);
+    return Number.isFinite(px) && px > 0 ? px : null;
+  }
+
+  // The screen transform that takes the map from the reading before to the reading now, as { k, tx, ty }:
+  // a point at (x, y) is now at (k x + tx, k y + ty). A pan and a zoom are both such a transform on a
+  // Mercator map. The zoom comes from two pins when there are two far enough apart, else from the scale bar.
+  // null when the pins disagree with it, or there is nothing to work it out from.
+  function follow(before, now) {
+    const pairs = [];
+    for (const [pin, where] of before.pins) {
+      if (!now.pins.has(pin)) continue;
+      const a = pinAt(where), b = pinAt(now.pins.get(pin));
+      if (!a || !b) return null;
+      pairs.push([a, b]);
+    }
+    let k = null;
+    if (pairs.length >= 2) {
+      let best = 0, i0 = 0, i1 = 1;
+      for (let i = 0; i < pairs.length; i++) for (let j = i + 1; j < pairs.length; j++) {
+        const d = Math.hypot(pairs[i][0][0] - pairs[j][0][0], pairs[i][0][1] - pairs[j][0][1]);
+        if (d > best) { best = d; i0 = i; i1 = j; }
+      }
+      if (best >= 20) k = Math.hypot(pairs[i0][1][0] - pairs[i1][1][0], pairs[i0][1][1] - pairs[i1][1][1]) / best;
+    }
+    if (k == null) {
+      if (!pairs.length) return null;
+      if (before.scale === now.scale && before.label === now.label) k = 1;
+      else {
+        const was = pxPerMetre(before), is = pxPerMetre(now);
+        if (was == null || is == null) return null;
+        k = is / was;
+      }
+    }
+    if (!Number.isFinite(k) || !(k > 0)) return null;
+    let tx = 0, ty = 0;
+    for (const [a, b] of pairs) { tx += b[0] - k * a[0]; ty += b[1] - k * a[1]; }
+    tx /= pairs.length; ty /= pairs.length;
+    for (const [a, b] of pairs) if (Math.hypot(k * a[0] + tx - b[0], k * a[1] + ty - b[1]) > 2) return null;
+    return { k, tx, ty };
   }
 
   // Has the map moved between two readings? The scale bar changes width on every zoom, and on a pan every pin
@@ -73,7 +127,8 @@
     let canvas = null, drawn = null;
     // ref: the reading the drawing belongs to. asked: the reading taken when the game last reported a view.
     // hiddenAt: when the map was seen to leave the place the drawing is for, or null while the layer shows.
-    let ref = null, asked = null, hiddenAt = null, watched = null, watchedBar = null, observer = null;
+    // slid: the transform the drawing is shown with while the map has moved on from ref, or null; placed is it as CSS.
+    let ref = null, asked = null, hiddenAt = null, slid = null, placed = '', watched = null, watchedBar = null, observer = null;
 
     function setHidden(on) {
       if (!canvas || (hiddenAt != null) === on) return;
@@ -82,11 +137,29 @@
       if (opts.onVisible) opts.onVisible(!on);
     }
 
-    // Runs whenever a pin or the scale bar changes: hides the layer the moment the map leaves the place it was
-    // drawn for, and shows it again if the map comes back there.
+    // Returns whether the drawing was moved on screen.
+    function place(t) {
+      slid = t && (t.k !== 1 || t.tx || t.ty) ? t : null;
+      if (!canvas) return false;
+      const want = slid ? 'translate(' + slid.tx + 'px, ' + slid.ty + 'px) scale(' + slid.k + ')' : '';
+      if (placed === want) return false;
+      placed = canvas.style.transform = want;
+      return true;
+    }
+
+    // Runs whenever a pin or the scale bar changes. While the map has moved on from the place the drawing is
+    // for, the drawing slides and scales along with it; when that cannot be worked out, it hides.
+    // A slide puts other hexagons under a still pointer, so the layer says it is showing again.
+    function settle(map) {
+      const now = reading(map);
+      const t = moved(ref, now) ? follow(ref, now) : { k: 1, tx: 0, ty: 0 };
+      const was = hiddenAt != null, slidNow = place(t);
+      setHidden(!t);
+      if (t && !was && slidNow && opts.onVisible) opts.onVisible(true);
+    }
     function check() {
       const map = drawn && drawn.level ? opts.mapCanvas() : null;
-      if (map) setHidden(moved(ref, reading(map)));
+      if (map) settle(map);
     }
 
     function watch(map) {
@@ -124,6 +197,7 @@
         canvas.setAttribute('aria-hidden', 'true');
         canvas.style.position = 'absolute';
         canvas.style.pointerEvents = 'none';
+        canvas.style.transformOrigin = '0 0';
       }
       if (map.nextElementSibling !== canvas) map.after(canvas);
       const s = canvas.style, left = map.offsetLeft + 'px', top = map.offsetTop + 'px', w = size.width + 'px', h = size.height + 'px';
@@ -170,7 +244,8 @@
       if (canvas) canvas.remove();
       canvas = null;
       drawn = null;
-      ref = asked = hiddenAt = null;
+      ref = asked = hiddenAt = slid = null;
+      placed = '';
     }
 
     // bounds: the map edges the game asked for. data: the resolution 6 level.
@@ -190,10 +265,11 @@
           // The game reported this same view again, so this is where the map is now.
           ref = asked;
           asked = null;
-          if (drawn.level) setHidden(moved(ref, reading(map)));
+          if (drawn.level) settle(map);
         } else if (hiddenAt != null && clock() - hiddenAt >= GIVE_UP_MS) {
           // No new view came after the map moved: better the layer as it was than none.
           ref = reading(map);
+          place(null);
           setHidden(false);
         }
         return drawn.info;
@@ -206,10 +282,10 @@
         paint(list, scale, bounds, size, dpr);
         drawn.level = level;
         drawn.info = { state: 'on', res, name: P.NAMES[res], lo: scale ? scale.lo : null, hi: scale ? scale.hi : null };
-        // If the map went on moving after the game asked, the drawing is already out of place: keep it hidden.
+        // If the map went on moving after the game asked, the drawing is already out of place: follow or hide.
         ref = asked || reading(map);
         asked = null;
-        setHidden(moved(ref, reading(map)));
+        settle(map);
       } catch (_) {
         canvas.width = canvas.width;
       }
@@ -222,7 +298,9 @@
       const map = drawn && drawn.level && hiddenAt == null ? opts.mapCanvas() : null;
       if (!map) return null;
       const box = map.getBoundingClientRect();
-      const where = J.fromScreen(drawn.bounds, drawn.size, clientX - box.left, clientY - box.top);
+      let x = clientX - box.left, y = clientY - box.top;
+      if (slid) { x = (x - slid.tx) / slid.k; y = (y - slid.ty) / slid.k; }
+      const where = J.fromScreen(drawn.bounds, drawn.size, x, y);
       if (!where || Math.abs(where.lat) > 89) return null;
       try {
         const id = g.h3.latLngToCell(where.lat, where.lng, drawn.res);
@@ -236,5 +314,5 @@
     return { render, at, remove, seen, check };
   }
 
-  IDT.heat = { ID, cells, moved, create };
+  IDT.heat = { ID, cells, moved, follow, create };
 })(globalThis);
