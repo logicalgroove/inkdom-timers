@@ -108,7 +108,7 @@ test('the layer is drawn after the map canvas, at its size, with the densest hex
   assert.deepEqual([canvas.style.left, canvas.style.top, canvas.style.width, canvas.style.height], ['0px', '0px', '1280px', '800px']);
   assert.deepEqual([canvas.width, canvas.height], [1280, 800]);
   assert.ok(pg.paths.length > 1000, 'paths ' + pg.paths.length);
-  assert.ok(pg.paths.some(p => p.fill === 'rgba(16,21,28,0.780)'));
+  assert.ok(pg.paths.some(p => p.fill === 'rgba(37,52,148,0.780)'));
   assert.ok(pg.paths.every(p => p.max - p.min < 40), 'hexagons are about 25 pixels across here');
 });
 

@@ -109,7 +109,7 @@ button:focus-visible{outline:2px solid var(--fg);outline-offset:1px}
 .switch[aria-checked="true"] i{left:14px;background:var(--bg)}
 @media (prefers-reduced-motion:reduce){.switch i{transition:none}}
 .legend{display:grid;gap:4px;font-size:11px}
-.ramp{height:8px;border-radius:2px;background:linear-gradient(90deg,rgba(16,21,28,.04),rgba(16,21,28,.78)),#f4f2ed}
+.ramp{height:8px;border-radius:2px;background:linear-gradient(90deg,rgba(37,52,148,.04),rgba(37,52,148,.78)),#f4f2ed}
 .ticks{display:flex;justify-content:space-between;color:var(--muted);font-size:10.5px}
 .hexes{color:var(--muted)}
 .here{min-height:2.7em}

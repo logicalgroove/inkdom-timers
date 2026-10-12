@@ -5,7 +5,7 @@
   const P = IDT.people, J = IDT.project;
 
   const ID = 'inkdom-timers-people';
-  const INK = '16,21,28', INSET = 0.93, STRIP = 60, MAX_KEPT = 60000, GIVE_UP_MS = 8000;
+  const INK = '37,52,148', INSET = 0.93, STRIP = 60, MAX_KEPT = 60000, GIVE_UP_MS = 8000;
   const wrap = lng => ((((lng + 180) % 360) + 360) % 360) - 180;
 
   // The hexagons of level.res that hold people inside rect, each with its corners, people and people per km².
