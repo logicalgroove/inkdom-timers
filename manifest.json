@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "InkDom Timers (unofficial)",
+  "version": "0.3.0",
+  "description": "Unofficial helper for InkDom. One panel with your timers and those of players on screen, and a people layer for the map. Read-only.",
+  "minimum_chrome_version": "111",
+  "icons": { "16": "icons/icon-16.png", "32": "icons/icon-32.png", "48": "icons/icon-48.png", "128": "icons/icon-128.png" },
+  "permissions": ["storage"],
+  "content_scripts": [
+    {
+      "matches": ["https://inkdom.io/play*"],
+      "js": ["src/reduce.js", "src/tap.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["https://inkdom.io/play*"],
+      "js": ["vendor/h3-js.umd.js", "src/guards.js", "src/ranks.js", "src/format.js", "src/readout.js", "src/store.js", "src/timers.js", "src/project.js", "src/people.js", "src/heat.js", "src/panel.js", "src/content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    { "resources": ["data/people-r6.bin"], "matches": ["https://inkdom.io/*"] }
+  ]
+}
