@@ -45,6 +45,12 @@ What it reads and what it saves on your computer is set out in full in [PRIVACY.
 
 ## Install
 
+Add it from the
+[Chrome Web Store](https://chromewebstore.google.com/detail/inkdom-timers-unofficial/iacgoflofeajgjjoimckhggdjjkniamm),
+then open or reload https://inkdom.io/play.
+
+To run it from this folder instead:
+
 1. Download this folder.
 2. Open `chrome://extensions`, switch on Developer mode, click "Load unpacked" and choose the folder.
 3. Open or reload https://inkdom.io/play.

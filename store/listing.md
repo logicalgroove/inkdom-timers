@@ -3,6 +3,9 @@
 What goes into the developer dashboard for InkDom Timers, field by field. The pictures are in this folder;
 `node tools/store-shots.js` takes them again.
 
+The listing is live at
+https://chromewebstore.google.com/detail/inkdom-timers-unofficial/iacgoflofeajgjjoimckhggdjjkniamm.
+
 ## Package
 
 `npm run package` writes `dist/inkdom-timers-<version>.zip`. That file is the upload.
