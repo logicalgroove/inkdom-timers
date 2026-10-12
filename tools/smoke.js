@@ -141,7 +141,7 @@ server.listen(0, '127.0.0.1', async () => {
   const url = 'http://127.0.0.1:' + server.address().port + '/index.html';
   const FIREFOX = process.env.FIREFOX;
   const browser = FIREFOX
-    ? spawn('npx', ['--yes', 'web-ext', 'run', '--no-input', '--no-reload', '--source-dir', ext, '--firefox', FIREFOX, '--start-url', url, '--args=-headless', '--args=--width=1280', '--args=--height=800'],
+    ? spawn('npx', ['--yes', 'web-ext@10.7.0', 'run', '--no-input', '--no-reload', '--source-dir', ext, '--firefox', FIREFOX, '--start-url', url, '--args=-headless', '--args=--width=1280', '--args=--height=800'],
       { stdio: 'ignore', detached: true })
     : spawn(CHROME, ['--headless=new', '--user-data-dir=' + path.join(tmp, 'profile'), '--disable-extensions-except=' + ext,
       '--load-extension=' + ext, '--no-first-run', '--no-default-browser-check', '--window-size=1280,800', url], { stdio: 'ignore' });
