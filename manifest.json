@@ -1,9 +1,13 @@
 {
   "manifest_version": 3,
   "name": "InkDom Timers (unofficial)",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Unofficial helper for InkDom. One panel with your timers and those of players on screen, and a people layer for the map. Read-only.",
   "minimum_chrome_version": "111",
+  "browser_specific_settings": {
+    "gecko": { "id": "inkdom-timers@logicalgroove.github.io", "strict_min_version": "140.0", "data_collection_permissions": { "required": ["none"] } },
+    "gecko_android": { "strict_min_version": "142.0" }
+  },
   "icons": { "16": "icons/icon-16.png", "32": "icons/icon-32.png", "48": "icons/icon-48.png", "128": "icons/icon-128.png" },
   "permissions": ["storage"],
   "content_scripts": [

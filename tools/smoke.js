@@ -9,6 +9,7 @@
 //                                  and the layer sliding with a pan, scaling with a zoom and hiding when the
 //                                  pins move in a way that is neither
 //   CHROME=/path/to/chrome node tools/smoke.js
+//   FIREFOX=/path/to/firefox node tools/smoke.js    the same in Firefox, loaded through web-ext as a temporary add-on
 const http = require('node:http');
 const fs = require('node:fs');
 const os = require('node:os');
@@ -107,7 +108,7 @@ const PAGE = `<!doctype html><meta charset="utf-8"><title>smoke</title><div aria
   await settle(300);
   people.hide.afterScatter = shown();
   await fetch('/report', { method: 'POST', body: JSON.stringify({
-    people,
+    people, viewport: [innerWidth, innerHeight, devicePixelRatio],
     panel: !!root, note: note && !note.hidden ? note.textContent : null, you: txt('.p-sec .kv'), rows: txt('.row'),
     ring: mark ? { hidden: mark.hidden, left: mark.style.left, top: mark.style.top, name: txt('.ring-tag .name')[0], outlined: mark.classList.contains('outlined') } : null,
     outline: root ? { display: root.querySelector('.outline').style.display, pathLength: (root.querySelector('.outline .line').getAttribute('d') || '').length } : null,
@@ -138,10 +139,15 @@ const server = http.createServer((req, res) => {
 
 server.listen(0, '127.0.0.1', async () => {
   const url = 'http://127.0.0.1:' + server.address().port + '/index.html';
-  const chrome = spawn(CHROME, ['--headless=new', '--user-data-dir=' + path.join(tmp, 'profile'), '--disable-extensions-except=' + ext,
-    '--load-extension=' + ext, '--no-first-run', '--no-default-browser-check', '--window-size=1280,800', url], { stdio: 'ignore' });
-  const result = await Promise.race([reported, new Promise(resolve => setTimeout(() => resolve(null), 20000))]);
-  chrome.kill();
+  const FIREFOX = process.env.FIREFOX;
+  const browser = FIREFOX
+    ? spawn('npx', ['--yes', 'web-ext', 'run', '--no-input', '--no-reload', '--source-dir', ext, '--firefox', FIREFOX, '--start-url', url, '--args=-headless', '--args=--width=1280', '--args=--height=800'],
+      { stdio: 'ignore', detached: true })
+    : spawn(CHROME, ['--headless=new', '--user-data-dir=' + path.join(tmp, 'profile'), '--disable-extensions-except=' + ext,
+      '--load-extension=' + ext, '--no-first-run', '--no-default-browser-check', '--window-size=1280,800', url], { stdio: 'ignore' });
+  const result = await Promise.race([reported, new Promise(resolve => setTimeout(() => resolve(null), FIREFOX ? 60000 : 20000))]);
+  if (FIREFOX) process.kill(-browser.pid);
+  else browser.kill();
   server.close();
   setTimeout(() => fs.rmSync(tmp, { recursive: true, force: true }), 500);
   console.log(JSON.stringify(result, null, 2));
@@ -155,7 +161,8 @@ server.listen(0, '127.0.0.1', async () => {
     pe.hide && pe.hide.before === 'visible' && pe.hide.afterPan === 'visible' && pe.hide.slide === 'translate(-200px, 70px) scale(1)' &&
     /in this hexagon$|^No people/.test(pe.hide.hereSlid || '') && pe.hide.hereSlid !== pe.here &&
     pe.hide.afterView === 'visible' && pe.hide.afterViewSlide === '' && /455,625 in this hexagon$/.test(pe.hide.hereBack || '') &&
-    pe.hide.afterZoom === 'visible' && pe.hide.zoom === 'translate(0px, 0px) scale(2)' && pe.hide.afterScatter === 'hidden';
+    // Firefox gives a zero translate back as translate(0px), Chrome as translate(0px, 0px).
+    pe.hide.afterZoom === 'visible' && /^translate\(0px(, 0px)?\) scale\(2\)$/.test(pe.hide.zoom) && pe.hide.afterScatter === 'hidden';
   console.log(ok ? 'SMOKE OK' : 'SMOKE FAILED');
   process.exitCode = ok ? 0 : 1;
 });

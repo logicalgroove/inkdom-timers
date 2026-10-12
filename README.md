@@ -1,6 +1,6 @@
 # InkDom Timers (unofficial)
 
-A Chrome extension for people who play [InkDom](https://inkdom.io/play). It adds one panel to the game with your
+A browser extension, for Chrome and Firefox, for people who play [InkDom](https://inkdom.io/play). It adds one panel to the game with your
 own timers and those of the players on your screen, and a layer you can switch on that shades the map by how many
 people live there. It is not made by, or endorsed by, the game's developer.
 
@@ -55,7 +55,11 @@ To run it from this folder instead:
 2. Open `chrome://extensions`, switch on Developer mode, click "Load unpacked" and choose the folder.
 3. Open or reload https://inkdom.io/play.
 
-Chrome 111 or later.
+On Firefox, desktop or Android, it will come from addons.mozilla.org once that listing is up. To run it from this
+folder on desktop Firefox meanwhile, open `about:debugging#/runtime/this-firefox`, click "Load Temporary Add-on"
+and choose `manifest.json`; it stays until Firefox is closed.
+
+Chrome 111 or later, or Firefox 140 or later (142 on Android).
 
 ## Limits
 
@@ -83,7 +87,10 @@ Chrome 111 or later.
 - The people figures are Kontur's release of 2023-11-01. The game may use another release, and it gives you the
   share of a hexagon your land covers, so what a loop pays can differ from the figures shown.
 
-## Known gaps in 0.4.0
+## Known gaps in 0.5.0
+
+Firefox was checked with the smoke test's stand-in page in Firefox Developer Edition, not in live play, and not
+on Android.
 
 The people layer was checked in live play on 2026-10-11: the game's sidebar, toolbar, buttons and avatars stay on
 top of it, it lines up with the map, and it follows the game's zoom buttons. The redraw on the game's view

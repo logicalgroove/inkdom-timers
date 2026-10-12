@@ -51,9 +51,19 @@ test('the people data is the one file the game page may read, and it is there', 
   assert.ok(fs.existsSync(path.join(root, 'data/people-r6.bin')));
 });
 
-test('still one permission, and version 0.4.0', () => {
+test('still one permission, and version 0.5.0', () => {
   assert.deepEqual(manifest.permissions, ['storage']);
-  assert.equal(manifest.version, '0.4.0');
+  assert.equal(manifest.version, '0.5.0');
+});
+
+// Firefox: Manifest V3 needs a fixed add-on id, and addons.mozilla.org refuses a new upload without a data
+// collection declaration. Content scripts in the page world need Firefox 128; the declaration is understood from
+// 140 on desktop and 142 on Android, and web-ext lint warns below those.
+test('the Firefox block names the add-on, Firefox 140 on desktop and 142 on Android, and no data collection', () => {
+  assert.deepEqual(manifest.browser_specific_settings, {
+    gecko: { id: 'inkdom-timers@logicalgroove.github.io', strict_min_version: '140.0', data_collection_permissions: { required: ['none'] } },
+    gecko_android: { strict_min_version: '142.0' }
+  });
 });
 
 test('package.json carries the same version as the manifest', () => {

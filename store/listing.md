@@ -1,14 +1,16 @@
-# Chrome Web Store listing
+# Store listings
 
-What goes into the developer dashboard for InkDom Timers, field by field. The pictures are in this folder;
-`node tools/store-shots.js` takes them again.
+What goes into the Chrome Web Store developer dashboard for InkDom Timers, field by field, and at the end what
+differs on addons.mozilla.org. The pictures are in this folder; `node tools/store-shots.js` takes them again.
 
-The listing is live at
+The Chrome listing is live at
 https://chromewebstore.google.com/detail/inkdom-timers-unofficial/iacgoflofeajgjjoimckhggdjjkniamm.
 
 ## Package
 
-`npm run package` writes `dist/inkdom-timers-<version>.zip`. That file is the upload.
+`npm run package` writes `dist/inkdom-timers-<version>.zip`. That file is the upload, to both stores.
+`npm run lint` runs Mozilla's `web-ext lint` over the extension files; it must report no errors before an upload
+to addons.mozilla.org, which runs the same checks.
 
 ## Store listing tab
 
@@ -97,3 +99,18 @@ The extension only acts on https://inkdom.io/play. Sign in to the game there. A 
 ```
 
 If the reviewer needs an account to get past the game's sign-in, give a test account's details in this tab.
+
+## addons.mozilla.org
+
+The same zip is the upload. The add-on id, `inkdom-timers@logicalgroove.github.io`, is in the manifest and is
+fixed for good once the first upload is signed. One listing covers desktop Firefox and Firefox for Android; the
+manifest asks for Firefox 140 on desktop and 142 on Android.
+
+- Name, summary and the data collection declaration (none) come from the manifest.
+- Category: Games & Entertainment. Also tick Android, so the listing shows up in the phone browser.
+- Description, screenshots and icon: the same as above. Mozilla takes screenshots of any size.
+- Privacy policy: the same text, pasted into the listing. Mozilla keeps the text rather than a link.
+- Notes to reviewer: the test instructions above, plus the licence of the H3 library in `vendor/`, and that the
+  people data file is a binary built from Kontur's public population data by `tools/build-people.js`.
+- Source code: not needed. Nothing is minified or built by a bundler; the H3 file in `vendor/` is the library's
+  own unmodified release.

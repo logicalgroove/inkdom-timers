@@ -1,8 +1,8 @@
 # Privacy policy: InkDom Timers (unofficial)
 
-Last changed: 11 October 2026.
+Last changed: 12 October 2026.
 
-InkDom Timers is a Chrome extension that adds a timers panel and a people layer to the game at
+InkDom Timers is a browser extension, for Chrome and Firefox, that adds a timers panel and a people layer to the game at
 https://inkdom.io/play. It is not made by, or endorsed by, the game's developer.
 
 ## In short
@@ -27,8 +27,8 @@ It makes no requests of its own. The people figures ship inside the extension; t
 
 ## What it saves on your computer
 
-Saved with Chrome's extension storage (`chrome.storage.local`), on this computer only. It is not synced to your
-Google account.
+Saved with the browser's extension storage (`storage.local`), on this computer only. It is not synced to your
+Google or Firefox account.
 
 - About you: your player id, your land area, your ink and when it was read, your lands' country names, shield
   and lock times, your refills and when they reset, your Joker time and the season's end.
@@ -49,13 +49,14 @@ are gone when the tab closes.
 - It does not click, draw, buy or send anything in the game.
 - It does not read anything on any other site.
 
-Its use of data follows the Chrome Web Store User Data Policy, including the Limited Use requirements.
+Its use of data follows the Chrome Web Store User Data Policy, including the Limited Use requirements, and the
+Firefox Add-on Policies. On addons.mozilla.org it is declared as collecting no data: nothing is transmitted.
 
 ## Removing what is saved
 
-Removing the extension at `chrome://extensions` deletes everything it saved.
+Removing the extension, at `chrome://extensions` or at `about:addons` in Firefox, deletes everything it saved.
 
 ## Questions and changes
 
-Questions go to the support contact shown on the extension's Chrome Web Store page. If this policy changes, the
+Questions go to the support contact shown on the extension's store page. If this policy changes, the
 new text and its date appear in this file.
