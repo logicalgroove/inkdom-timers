@@ -36,7 +36,7 @@
       if (ready) handle(event, Date.now());
       else queue.push([event, Date.now()]);
       // A new map view: move the layer on the next frame rather than waiting for the one-second tick.
-      if (event.type === 'world' && event.in_view && layer.on) {
+      if ((event.type === 'view' || (event.type === 'world' && event.in_view)) && layer.on) {
         if (layer.canvas) layer.canvas.seen();
         if (!layer.frame) layer.frame = requestAnimationFrame(() => { layer.frame = 0; drawPeople(); });
       }

@@ -59,6 +59,18 @@ test("for the game's view question the body is read, nothing else of the request
   assert.equal(JSON.stringify(win.posted).includes('secret'), false);
 });
 
+test('the edges of a view question are posted as a view event when it is sent, before any answer comes', async () => {
+  const win = fakeWindow(() => new Promise(() => {}));
+  const body = JSON.stringify({ fn: 'view_members', args: { minx: 86.25, miny: 21.5, maxx: 91.6, maxy: 24.4 } });
+  win.fetch('/api/read', { method: 'POST', body });
+  assert.deepEqual(win.posted.map(p => p.msg.events), [[{ type: 'view', bounds: { west: 86.25, south: 21.5, east: 91.6, north: 24.4 } }]]);
+  assert.equal(win.posted[0].origin, 'https://inkdom.io');
+  win.fetch('/api/read', { method: 'POST', body: JSON.stringify({ fn: 'other', args: {} }) });
+  win.fetch('/api/read', { method: 'POST', body: new Uint8Array([1]) });
+  await settle();
+  assert.equal(win.posted.length, 1);
+});
+
 test('a view question whose body is not text gives the view without edges', async () => {
   const win = fakeWindow(json(fx.viewMembers()));
   await win.fetch('/api/read', { method: 'POST', body: new Uint8Array([1, 2, 3]) });

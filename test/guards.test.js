@@ -88,6 +88,12 @@ test('world: pins need a real id and a real place, map edges need all four numbe
   }
 });
 
+test('view: the map edges the game is asking about, and nothing else; bad edges reject the event', () => {
+  const ok = { west: 86.2, south: 21.5, east: 91.6, north: 24.4 };
+  assert.deepEqual(sanitize({ type: 'view', bounds: Object.assign({ junk: 1 }, ok), extra: 'x' }), { type: 'view', bounds: ok });
+  for (const bad of [null, {}, { west: 1, south: 5, east: 3, north: 2 }]) assert.equal(sanitize({ type: 'view', bounds: bad }), null, JSON.stringify(bad));
+});
+
 test('world: as_of is optional, a missing in_view is null, an empty list stays a list', () => {
   assert.deepEqual(sanitize({ type: 'world', players: [{ id: B, name: 'n' }] }), {
     type: 'world', as_of: null, self: null,

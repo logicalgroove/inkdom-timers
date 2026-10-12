@@ -74,6 +74,10 @@
         const empty = out.as_of == null && !out.self && !out.players.length && !out.loops.length && !out.shields.length && !out.in_view && !out.shapes.length;
         return empty ? null : out;
       }
+      case 'view': {
+        const bounds = edges(e.bounds);
+        return bounds ? { type: 'view', bounds } : null;
+      }
       case 'shop': {
         const r = isObj(e.refill) ? e.refill : {};
         return {

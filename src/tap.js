@@ -21,6 +21,8 @@
     // The original promise is returned as is. Of the request, only the address is looked at, with one
     // exception: for the game's /api/read the body text is passed on, so the reducer can take the four
     // map edges out of a "who is in view" question. Headers are never touched.
+    // The edges are posted as soon as the question is sent: the map is already there, and the layer
+    // need not wait for the answer.
     win.fetch = function () {
       const p = orig.apply(this, arguments);
       try {
@@ -28,6 +30,8 @@
         if (kind) {
           const init = kind === 'read' ? arguments[1] : null;
           const body = init != null && typeof init === 'object' && typeof init.body === 'string' ? init.body : null;
+          const bounds = body == null ? null : reducer.boundsOf(body);
+          if (bounds) post({ events: [{ type: 'view', bounds }] });
           p.then(res => {
             if (!res || !res.ok) return undefined;
             return res.clone().json().then(json => {

@@ -92,6 +92,10 @@
         }
         break;
       }
+      case 'view':
+        // The game has just asked who is in a view: the map is there now, before the answer says who.
+        state.bounds = e.bounds;
+        break;
       case 'lands':
         for (const l of e.lands) upsertLand(state, l.player_id, l.slot, l, localNow + state.offset_ms);
         break;

@@ -136,6 +136,17 @@ test('a view brings its points and map edges, a newer view replaces them, an old
   assert.deepEqual(revive(JSON.parse(JSON.stringify(saved))).pins, {});
 });
 
+test('a view being asked for moves the map edges at once and leaves who is on screen as it was', () => {
+  const s = first();
+  apply(s, world({ as_of: T + 1000, in_view: [P1], pins: [{ id: P1, lat: 23, lng: 88 }], bounds: { west: 86, south: 21, east: 92, north: 25 } }), T + 1000 - SLOW);
+  const asked = { west: 80, south: 18, east: 97, north: 27 };
+  apply(s, { type: 'view', bounds: asked }, T + 1500 - SLOW);
+  assert.deepEqual(s.bounds, asked);
+  assert.deepEqual(s.in_view, [P1]);
+  assert.deepEqual(s.pins, { [P1]: { lat: 23, lng: 88 } });
+  assert.equal(s.view_at, T + 1000);
+});
+
 test('land shapes are kept per player, replaced by a newer one, never kept for yourself, and never saved', () => {
   const s = first();
   const a = [[88, 23, 89, 23, 89, 24]], b = [[88, 23, 89.5, 23, 89.5, 24.5]];
